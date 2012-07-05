@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="client/src"/>
+	<classpathentry kind="src" path="srcZk"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ADEMPIERE_LIB"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0"/>
+	<classpathentry kind="lib" path="/OpenBravoPOS/lib/activemq-all-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/OpenBravoPOS/lib/log4j-1.2.14.jar"/>
+	<classpathentry kind="lib" path="/OpenBravoPOS/lib/jboss.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/SmartPOSERPCustomization"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/adempiere361"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

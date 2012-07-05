@@ -1,0 +1,145 @@
+<project name="smj" default="dist" basedir=".">
+    <description>
+        Creacion de personalizacion smj : www.smartjsp.com
+    </description>
+  <!-- define propiesdades para este build -->
+  <property file="buildExtension.properties"/>
+  <property name="src" location="src"/>
+  <property name="srcZk" location="srcZk"/>
+  <property name="extension" location="extension"/>
+  <property name="srcWeb" location="zkwebui"/>
+  <property name="srcWebExt" location="zkwebuiExtension"/>
+  <property name="build_web" location="build/WEB-INF/classes"/>	
+  <property name="build" location="build"/>
+  <property name="buildJava" location="buildJava"/>
+  
+
+  <path id="lib.class.path">
+     <fileset dir="${adempiere.home}/lib">
+        <include name="*.jar"/>
+     </fileset>
+       <fileset dir="${adempiere.trunk}/zkwebui/WEB-INF/lib">
+	        <include name="*.jar"/>
+	   </fileset>
+  </path>
+ 
+  <target name="clean"
+	        description="clean up" >
+	    <!-- Delete the ${build} and ${dist} directory trees -->
+	    <delete dir="${build}"/>
+  	    <delete dir="${buildJava}"/>
+  	<!-- <delete dir="${adempiere.zkCustomLibDir}"/>
+  	    <delete dir="${adempiere.customLibDir}"/>  -->
+  </target>
+  <target name="init" depends="clean" description="inicializa">
+    <echo message="Inicializando proyecto ..."/>
+    <echo message="Trunk PATH: ${adempiere.trunk}"/>
+    <echo message="ADempiere home: ${adempiere.home}"/>
+  	<echo message="ZK Deploy dir: ${adempiere.zkCustomLibDir}"/>
+  	<echo message="Zk Jar file dir: ${adempiere.zkCustomLibDir}/${adempiere.zkCustomJarFile}"/>
+  	<echo message="Deploy dir Java: ${adempiere.customLibDir}"/>
+  	<echo message="Jar file dir: ${adempiere.customLibDir}/${adempiere.customJarFile}"/>
+  	<echo message="path para clases: ${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
+  	
+    <!-- Crea the time stamp -->
+    <tstamp/>
+  	<!-- Crea el directorio del build -->
+  	    <mkdir dir="${buildJava}"/>
+    <!-- Crea el directorio del build para Web-->
+    <mkdir dir="${build}"/>
+  	<copy todir="${build}">
+  	     	<fileset dir="${srcWeb}">
+  	  	       <include name="**/*"/>
+  	  		 </fileset>
+  		     <fileset dir="${srcWebExt}">
+  		  	   <include name="**/*"/>
+  		  	 </fileset>
+  	</copy>
+  	<mkdir dir="${build}/WEB-INF/classes"/>
+  </target>
+
+  <target name="compile" depends="init" description="compilando codigo fuente ">
+       <!-- Compila el codigo java (base) desde ${src} a ${build_java}  (opcional a build_web)-->
+  	
+    <javac srcdir="${src}" destdir="${buildJava}" debug="on" debuglevel="lines,vars,source">
+      <classpath refid="lib.class.path"/>
+    </javac>
+  	
+  	
+    <javac srcdir="${src}" destdir="${build_web}" debug="on" debuglevel="lines,vars,source">
+       <classpath refid="lib.class.path"/>
+     </javac>
+  	
+  	<javac srcdir="client/src" destdir="${build_web}" debug="on" debuglevel="lines,vars,source">
+  	      <classpath refid="lib.class.path"/>
+  	</javac>
+  	
+  	   <mkdir dir="${adempiere.home}/lib2" /> 
+  
+  	
+  	<!-- crea archivo .jar file de solo java  -->
+  	<jar jarfile="${adempiere.home}/lib2/webC.jar" basedir="${adempiere.trunk}/zkwebui/WEB-INF/classes"/>
+  	
+  	
+  	<javac srcdir="${srcZk}" destdir="${build_web}" debug="on" debuglevel="lines,vars,source">
+  	      <classpath refid ="lib.class.path"/>
+  	  <classpath location="${adempiere.home}/lib2/webC.jar"/>
+  		
+  	</javac>
+  	
+  	  <delete dir="${adempiere.home}/lib2" /> 
+  		
+  </target>
+
+  <target name="dist" depends="compile" description="genera el jar final" >
+    <!-- Crea directorio para despligue del jar -->
+  	<mkdir dir="${adempiere.customLibDir}"/>
+  	<!-- Crea directorio para despligue del jar de ZK -->
+    <mkdir dir="${adempiere.zkCustomLibDir}"/>
+  	
+  	<!-- crea archivo .jar file de solo java  -->
+  	<jar jarfile="${adempiere.customLibDir}/${adempiere.customJarFile}" basedir="${buildJava}"/>
+  	 <!-- crea archivo .jar file de zk-->
+    <jar jarfile="${adempiere.zkCustomLibDir}/${adempiere.zkCustomJarFile}" basedir="${build}"/>
+  	
+    <delete dir="${build}"/>
+    <delete dir="${buildJava}"/>
+
+  	
+  </target>
+
+	<target name="liveDeploy" description=" despliega la personalizacion ZK de forma acelerada" >
+		 
+		 	<!-- Borra archivos anteriores  -->	
+		    <delete file="${adempiere.tomcat}/zkpatches.jar"/>
+		    <delete file="${adempiere.tomcat}/liberozkMFG.jar"/>
+		    <delete file="${adempiere.tomcat}/zkcustomization.jar"/>
+		    <delete file="${adempiere.tomcat}/zkpackages_SMJ.jar"/>
+		 	<!-- Copia archivos desde el home de adempiere  --> 
+		 	 	
+		        	<copy todir="${adempiere.tomcat}">
+		 	 	     <fileset dir="${adempiere.home}/lib">
+		 	 	      	      <include name="zkpatches.jar"/>
+		 	 	     </fileset>
+		 	         <fileset dir="${adempiere.home}/zkpackages/liberoMFG/lib">
+		 	 	  	   <include name="liberozkMFG.jar"/>
+		 	 	  	 </fileset>
+		 	 	     <fileset dir="${adempiere.home}/lib">
+		 	 	            <include name="zkcustomization.jar"/>
+		 	 	     </fileset>
+		 	         <fileset dir="${adempiere.home}/zkpackages/SMJ/lib">
+		 	  	  	      <include name="zkpackages_SMJ.jar"/>
+		 	  	  	 </fileset>
+		 	 	  	</copy>
+
+		 	<!-- Descomprime los archivos encima de la version de tomcat -->
+		 	
+		   	<unjar src="${adempiere.tomcat}/zkpatches.jar" dest="${adempiere.tomcat}"/>
+		 	<unjar src="${adempiere.tomcat}/liberozkMFG.jar" dest="${adempiere.tomcat}"/>
+		 	<unjar src="${adempiere.tomcat}/zkcustomization.jar" dest="${adempiere.tomcat}"/>
+		 	<unjar src="${adempiere.tomcat}/zkpackages_SMJ.jar" dest="${adempiere.tomcat}"/>
+		 	
+		 </target>
+
+
+</project>
